@@ -1,0 +1,20 @@
+{
+  "name": "webrtc-chat-client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LaurentLabine/WebRTC-Chat-Client.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LaurentLabine/WebRTC-Chat-Client/issues"
+  },
+  "homepage": "https://github.com/LaurentLabine/WebRTC-Chat-Client#readme"
+}
