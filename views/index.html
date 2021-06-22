@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../public/css/stylesheet.css" type="text/css" />
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <div id='videoFeedContainer'>
+      <span>
+      <video id='localVideo' autoplay playsinline></video>
+    </span>
+    <span>
+      <video id='remoteVideo' src=""></video>
+    </span>
+  </div>
+  <h2>Start your webcam</h2>
+  <button id='webcamButton'>Start webcam</button>
+  <h2>Create/Make a call</h2>
+  <div id='CallControls'>
+  <input id='callIDInput' type="text"></input>
+  <button id='callButton'>Create/Join Call</button>
+</div>
+
+    <!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+    
+    <script src="../public/videocall.mjs" type="module"></script>
+  </body>
+</html>
