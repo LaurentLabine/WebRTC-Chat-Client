@@ -1,16 +1,5 @@
 const socket = io();
 
-const servers = {
-  iceServers: [
-    {
-      urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
-    },
-  ],
-  iceCandidatePoolSize: 10,
-};
-
-// Global State
-const pc = new RTCPeerConnection(servers);
 let localStream = null;
 let remoteStream = null;
 let webcamRunning = false;
@@ -23,11 +12,43 @@ const callIDInput = document.getElementById('callIDInput');
 const answerButton = document.getElementById('answerButton');
 const remoteVideo = document.getElementById('remoteVideo');
 const hangupButton = document.getElementById('hangupButton');
+const debugButton = document.getElementById('debugButton')
 
 const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
 const peerConnection = new RTCPeerConnection(configuration);
 
-console.log(peerConnection)
+peerConnection.onaddstream = handleRemoteStreamAdded;
+
+function handleRemoteStreamAdded(event) {
+  remoteStream = event.stream;
+  remoteVideo.srcObject = remoteStream;
+}
+
+// Listen for connectionstatechange on the local RTCPeerConnection
+peerConnection.addEventListener('connectionstatechange', event => {
+  if (peerConnection.connectionState === 'connected') {
+      console.log('Connected')
+  }
+});
+
+// Listen for local ICE candidates on the local RTCPeerConnection
+peerConnection.addEventListener('icecandidate', event => {
+  if (event.candidate) {
+    socket.emit('new-ice-candidate', event.candidate);
+  }
+});
+
+socket.on('remote-ice-candidate', async (candidate) => {
+    try {
+        await peerConnection.addIceCandidate(candidate);
+    } catch (e) {
+        console.error('Error adding received ice candidate', e);
+    }
+})
+
+debugButton.addEventListener('click', () => {
+  console.log(peerConnection)
+})
 
 // Taken from https://webrtc.org/getting-started/peer-connections
 async function makeCall() {
@@ -35,89 +56,47 @@ async function makeCall() {
   // If no ID is provided, a new one is generated
   const callID = callIDInput.value === '' ? makeId() : callIDInput.value
 
+  callIDInput.value = callID;
+
   // Initiate a call passing along the ID.
   socket.emit('initiateCall', callID)
 }
 
-// Once the RTCPeerConnection is created we need to create an SDP offer or answer, 
-// depending on if we are the calling peer or receiving peer. Once the SDP offer or 
-// answer is created, it must be sent to the remote peer through a different channel. 
-// Passing SDP objects to remote peers is called signaling and is not covered by the WebRTC specification.
+// Created offer and set it as local description for caller.
+socket.on('OtherJoined', async (payload) => {
 
-
-//When call is created we do nothing.  Wait for other user to connect to create the offer and send it over.
-// socket.on('call created', async (callID) => {
-//   console.log('Client - Call Created - Creating Offer')
-//   const offer = await peerConnection.createOffer();
-//   await peerConnection.setLocalDescription(offer);
-//   socket.emit('new offer', {'callID': callID, 'offer': offer});
-// })
-
-socket.on('other user joined', async (payload) => {
-  console.log('Client - Other User Joined' + JSON.stringify(payload))
   const offer = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);
-  console.log(peerConnection)
-  socket.emit('Created Offer', {caller: payload.caller, target: payload.target, offer : offer});
+
+  socket.emit('OfferCreated', {caller: payload.caller, target: payload.target, offer : offer});
 })
 
+
+// Offer Received by Server.  Setting it as remote session description
 socket.on('ReceivedOffer', async (payload) => {
+
   peerConnection.setRemoteDescription(new RTCSessionDescription(payload.offer));
-  // console.log('Received offer ' + JSON.stringify(peerConnection.connectionState))
-  // console.log(peerConn)
   const answer = await peerConnection.createAnswer();
   await peerConnection.setLocalDescription(answer);
-  console.log('Done')
-  console.log(peerConnection)
-  // console.log('Received offer ' + JSON.stringify(peerConnection.connectionState))
-  // console.log({caller: payload.caller, target: payload.target, offer : payload.offer, answer: answer}) // Here everything is known
+
   socket.emit('answer', {caller: payload.caller, target: payload.target, offer : payload.offer, answer: answer});
 })
 
+// Call Initiator receives the answer and sets remote SDP
 socket.on('ReceivedAnswer', async (payload) => {
-  console.log('Done')
-  // console.log('Received offer ' + JSON.stringify(peerConnection.connectionState))
-  console.log(peerConnection)
-  //  Here everything is known
+  await peerConnection.setRemoteDescription(new RTCSessionDescription(payload.answer));
 })
 
+callButton.onclick = async () => {
+  makeCall()
+}
 
-// Listen for local ICE candidates on the local RTCPeerConnection
-peerConnection.addEventListener('icecandidate', event => {
-  if (event.candidate) {
-      signalingChannel.send({'new-ice-candidate': event.candidate});
-  }
-});
-
-// // Listen for remote ICE candidates and add them to the local RTCPeerConnection
-// socket.on('','message', async message => {
-//   console.log('Remote ICE Event')
-//   if (message.iceCandidate) {
-//       try {
-//           await peerConnection.addIceCandidate(message.iceCandidate);
-//       } catch (e) {
-//           console.error('Error adding received ice candidate', e);
-//       }
-//   }
-// });
-
-
-// socket.on('offer', async message => {
-//   const offer = await peerConnection.createOffer();
-//   await peerConnection.setLocalDescription(offer);
-//   socket.emit({'offer': offer});
-// });
-
-// socket.on('Answer', async message => {
-//   if (message.answer) {
-//       const remoteDesc = new RTCSessionDescription(message.answer);
-//       await peerConnection.setRemoteDescription(remoteDesc);
-//   }
-// });
-
-// 1. Setup media sources
-
+// 1. Setup Webcam Stuff
 webcamButton.onclick = async () => {
+
+  webcamRunning = !webcamRunning;
+    callButton.disabled = !callButton.disabled;
+
   if(localStream){
     localStream.getTracks().forEach(track => track.stop())
     localStream = null
@@ -125,41 +104,19 @@ webcamButton.onclick = async () => {
   }
   else{
 
-  localStream = await navigator.mediaDevices.getUserMedia({
-    video: true,
-    // audio: true,
-  });
-
-  remoteStream = new MediaStream();
-
-  // Push tracks from local stream to peer connection
-  localStream.getTracks().forEach((track) => {
-    pc.addTrack(track, localStream);
-  });
-
-  // Pull tracks from remote stream, add to video stream
-  pc.ontrack = (event) => {
-    event.streams[0].getTracks().forEach((track) => {
-      remoteStream.addTrack(track);
+    localStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      // audio: true,
     });
-  };
 
-  localVideo.srcObject = localStream;
-  remoteVideo.srcObject = remoteStream;
-
-  webcamRunning = !webcamRunning;
-  // callButton.disabled = !callButton.disabled;
-}
-
-  // callButton.disabled = false;
-  // answerButton.disabled = false;
-  // webcamButton.disabled = true;
+    peerConnection.addStream(localStream)
+    remoteStream = new MediaStream();
+    localVideo.srcObject = localStream;
+  }
 };
 
-callButton.onclick = async () => {
-  makeCall()
-  // console.log('Call Button Clicked')
-  // socket.emit('EstablishCall')
+const enableButtons = () => {
+
 }
 
 // Random ID Generation.

@@ -19,7 +19,7 @@
       <video id='localVideo' autoplay playsinline></video>
     </span>
     <span>
-      <video id='remoteVideo' src=""></video>
+      <video id='remoteVideo' autoplay playsinline></video>
     </span>
   </div>
   <h2>Start your webcam</h2>
@@ -27,7 +27,8 @@
   <h2>Create/Make a call</h2>
   <div id='CallControls'>
   <input id='callIDInput' type="text"></input>
-  <button id='callButton'>Create/Join Call</button>
+  <button id='callButton' disabled>Create/Join Call</button>
+  <button id='debugButton'>Debug</button>
 </div>
 
     <!--[if lt IE 7]>

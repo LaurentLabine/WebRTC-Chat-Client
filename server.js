@@ -15,11 +15,8 @@ app.get('/', (req, res) => {
 })
 
 const server = http.createServer(app)
-
 const port = process.env.PORT || 3000;
-
 const io = socketIO(server)
-
 const calls = {};
 
 io.on('connection', socketIO => {
@@ -39,7 +36,7 @@ io.on('connection', socketIO => {
         console.log('Server - ' + socketIO.id + ' Joined')
         // console.log(typeof(socketIO.id))
         // socketIO.emit('other user joined', socketIO.id)
-        io.to(calls[callID][0]).emit('other user joined', {caller: calls[callID][0], target:socketIO.id})
+        io.to(calls[callID][0]).emit('OtherJoined', {caller: calls[callID][0], target:socketIO.id})
       }
 
       // Otherwise we register the call
@@ -47,25 +44,11 @@ io.on('connection', socketIO => {
       //Otherwise create and register it with the unique socket id
       calls[callID] = [socketIO.id]
       console.log('Server - Call Created')
-      socketIO.emit('call created')
     }
-
-    // // check if you are currently user a joining or user b
-    // const otherUser = calls[callID].find(id => id !== socketIO.id);
-    // if (otherUser) {
-    //   // if the other user exists in the room..
-    //   // (user b) emit a 'current' back up to ourselves with the other users socket id
-    //   socketIO.emit('other user', otherUser);
-    //   // emit the other users socket.id
-    //   socketIO.to(otherUser).emit('user joined', socketIO.id);
-    //   // you can see how this plays out more on the front end.
-    // }
-
     console.log(calls)
 
       // when offer gets fired
-    socketIO.on('Created Offer', payload => {
-      console.log('Server - Received Offer from ' + payload.caller + 'to be shared with : ' + payload.target)
+    socketIO.on('OfferCreated', payload => {
       io.to(payload.target).emit('ReceivedOffer', payload);
   });
 
@@ -78,30 +61,15 @@ io.on('connection', socketIO => {
   });
 
    // each peer will come up with an 'ice server'
-   socketIO.on('ice-candidate', incoming => {
-     console.log('received ice-candidate')
-    io.to(incoming.target).emit('ice-candidate', incoming.candidate);
+   socketIO.on('new-ice-candidate', incoming => {
+
+    //Determine which candidate to send this to
+    if(calls[callID].indexOf(socketIO.id) === 0){
+      io.to(calls[callID][1]).emit('remote-ice-candidate', incoming);
+    } else {
+      io.to(calls[callID][0]).emit('remote-ice-candidate', incoming);
+    }
   });
-
-  // Now, let us create a 'handshake.'
-
-  // when offer gets fired
-  socketIO.on('offer', payload => {
-    io.to(payload.target).emit('offer', payload);
-  });
-
-  // the payload contains who we are as a user and the 'offer' object.
-
-  // listen for the answer event
-  socketIO.on('answer', payload => {
-    io.to(payload.target).emit('answer', payload);
-  });
-
-  socketIO.on('ice-candidate', incoming => {
-    io.to(incoming.target).emit('ice-candidate', incoming.candidate);
-  });
-
-
   })
 })
 
