@@ -1,5 +1,5 @@
 import { makeId } from './util/makeId.js'
-import RTCConnection from './models/rtcConnection.js'
+import RTCConnection from '../models/rtcConnection.js'
 
 const webRTCConnection = new RTCConnection();
 let webcamRunning = false

@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const http = require('http')
-const  startSignalingServer = require('./public/util/signalingServer')
+const  startSignalingServer = require('./public/src/util/signalingServer')
 
 const app = express();
 
