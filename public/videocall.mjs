@@ -1,3 +1,5 @@
+import { makeId } from './util/makeId.js'
+
 const socket = io();
 
 let localStream = null;
@@ -50,18 +52,6 @@ debugButton.addEventListener('click', () => {
   console.log(peerConnection)
 })
 
-// Taken from https://webrtc.org/getting-started/peer-connections
-// async function makeCall() {
-
-//   // If no ID is provided, a new one is generated
-//   const callID = callIDInput.value === '' ? makeId() : callIDInput.value
-
-//   callIDInput.value = callID;
-
-//   // Initiate a call passing along the ID.
-//   socket.emit('initiateCall', callID)
-// }
-
 // Created offer and set it as local description for caller.
 socket.on('OtherJoined', async (payload) => {
 
@@ -110,7 +100,7 @@ webcamButton.onclick = async () => {
 
     localStream = await navigator.mediaDevices.getUserMedia({
       video: true,
-      audio: true,
+      audio: true, 
     });
 
     peerConnection.addStream(localStream)
@@ -118,18 +108,3 @@ webcamButton.onclick = async () => {
     localVideo.srcObject = localStream;
   }
 };
-
-const enableButtons = () => {
-
-}
-
-// Random ID Generation.
-// Taken from https://medium.com/@weberzt/how-to-create-a-random-id-in-javascript-e92b39fedaef
-const makeId = () => {
-  let ID = "";
-  let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  for ( var i = 0; i < 12; i++ ) {
-    ID += characters.charAt(Math.floor(Math.random() * 36));
-  }
-  return ID;
-}
