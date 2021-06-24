@@ -6,20 +6,13 @@ export default class RTCConnection {
     this.remoteStream = new MediaStream();
     this.peerConnection = new RTCPeerConnection(configuration);
 
-    // Event Declarations
+    // Events Implementation
     this.peerConnection.addEventListener('addstream', event => {
       this.remoteStream = event.stream;
       remoteVideo.srcObject = this.remoteStream;
     });
     
-    this.peerConnection.addEventListener('connectionstatechange', event => {
-      if (this.peerConnection.connectionState === 'connected') {
-          console.log('Connected')
-      }
-    });
-    
-    // Listen for connectionstatechange on the local RTCPeerConnection
-    this.peerConnection.addEventListener('connectionstatechange', event => {
+    this.peerConnection.addEventListener('connectionstatechange', () => {
       if (this.peerConnection.connectionState === 'connected') {
           console.log('Connected')
       }
@@ -64,8 +57,6 @@ export default class RTCConnection {
     socket.on('ReceivedAnswer', async (payload) => {
     await this.peerConnection.setRemoteDescription(new RTCSessionDescription(payload.answer));
     })
-
-
   }
 
   initiateCall = (callID) => {
