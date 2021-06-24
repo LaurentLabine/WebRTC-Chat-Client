@@ -17,7 +17,10 @@ webcamButton.onclick = async () => {
 
     webRTCConnection.localStream = await navigator.mediaDevices.getUserMedia({
       video: true,
-      audio: true, 
+      audio: {
+        sampleSize: 8,
+        echoCancellation: true
+      }
     });
 
     webRTCConnection.addLocalStream()
