@@ -51,16 +51,16 @@ debugButton.addEventListener('click', () => {
 })
 
 // Taken from https://webrtc.org/getting-started/peer-connections
-async function makeCall() {
+// async function makeCall() {
 
-  // If no ID is provided, a new one is generated
-  const callID = callIDInput.value === '' ? makeId() : callIDInput.value
+//   // If no ID is provided, a new one is generated
+//   const callID = callIDInput.value === '' ? makeId() : callIDInput.value
 
-  callIDInput.value = callID;
+//   callIDInput.value = callID;
 
-  // Initiate a call passing along the ID.
-  socket.emit('initiateCall', callID)
-}
+//   // Initiate a call passing along the ID.
+//   socket.emit('initiateCall', callID)
+// }
 
 // Created offer and set it as local description for caller.
 socket.on('OtherJoined', async (payload) => {
@@ -88,7 +88,11 @@ socket.on('ReceivedAnswer', async (payload) => {
 })
 
 callButton.onclick = async () => {
-  makeCall()
+  // If the value is empty, we create a random one..
+  const callID = callIDInput.value === '' ? makeId() : callIDInput.value
+  callIDInput.innerText = callID;
+  // Initiate a call passing along the ID.
+  socket.emit('initiateCall', callID)
 }
 
 // 1. Setup Webcam Stuff
@@ -106,7 +110,7 @@ webcamButton.onclick = async () => {
 
     localStream = await navigator.mediaDevices.getUserMedia({
       video: true,
-      // audio: true,
+      audio: true,
     });
 
     peerConnection.addStream(localStream)
