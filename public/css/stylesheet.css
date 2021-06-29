@@ -24,12 +24,12 @@ button {
   margin: 5px;
 }
 
-video {
-  border: 3px solid white;
-}
-
 input {
   height: 1.5rem;
+}
+
+video {
+  border: 3px solid white;
 }
 
 #videoFeedContainer {
