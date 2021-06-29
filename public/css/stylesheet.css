@@ -12,17 +12,59 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-image: url('../images/bailey-zindel-NRQV-hBF10M-unsplash.jpg');
-
-  background-size: cover;
-  background-repeat: no-repeat;
   color: white;
 }
 
-button {
-  padding: 5px;
-  margin: 5px;
+#background {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  z-index: -1; /* Ensure div tag stays behind content; -999 might work, too. */
 }
+
+.stretch {
+  width: 100%;
+  height: 100%;
+}
+
+/* Button Styles taken from https://codepen.io/joebocock/pen/ZEWoMPb */
+button {
+  margin: 10px;
+  font-family: inherit;
+}
+
+/* Fill button styling */
+.fill {
+  font-size: 20px;
+  font-weight: 200;
+  letter-spacing: 1px;
+  padding: 13px 50px 13px;
+  outline: 0;
+  border: 1px solid black;
+  cursor: pointer;
+  position: relative;
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.fill::after {
+  content: '';
+  background-color: #dcbaff;
+  width: 100%;
+  z-index: -1;
+  position: absolute;
+  height: 100%;
+  top: 7px;
+  left: 7px;
+  transition: 0.2s;
+}
+
+.fill:hover::after {
+  top: 0px;
+  left: 0px;
+}
+/* End of Fill Button  */
 
 input {
   height: 1.5rem;

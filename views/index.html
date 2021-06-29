@@ -19,6 +19,13 @@
   </head>
 
   <body>
+    <div id="background">
+      <img
+        src="../public/images/bailey-zindel-NRQV-hBF10M-unsplash.jpg"
+        class="stretch"
+        alt=""
+      />
+    </div>
     <div id="videoFeedContainer">
       <span id="remoteVideoContainer">
         <video
@@ -35,13 +42,13 @@
     </div>
     <div id="controlsContainer">
       <h2>1. Enable your camera.</h2>
-      <button id="webcamButton">Turn on Camera</button>
+      <button class="fill" id="webcamButton">Turn on Camera</button>
       <h2>
         2. If you have an ID, paste it here and connect, Otherwise it will give
         you one to share!
       </h2>
       <input id="callIDInput" type="text" />
-      <button id="callButton" disabled>Start Call</button>
+      <button class="fill" id="callButton" disabled>Start Call</button>
     </div>
 
     <!--[if lt IE 7]>
