@@ -5,36 +5,52 @@
 <!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
 <html>
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title></title>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="../public/css/stylesheet.css" type="text/css" />
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="../public/css/stylesheet.css"
+      type="text/css"
+    />
     <script src="/socket.io/socket.io.js"></script>
   </head>
+
   <body>
-    <div id='videoFeedContainer'>
-      <span>
-      <video id='localVideo' autoplay playsinline muted="muted"></video>
-    </span>
-    <span>
-      <video id='remoteVideo' autoplay playsinline></video>
-    </span>
-  </div>
-  <h2>First and foremost, You need video!</h2>
-  <button id='webcamButton'>Let's Do it!</button>
-  <h2>If you have an ID, try it on, Otherwise it will create one for you!</h2>
-  <div id='CallControls'>
-  <input id='callIDInput' type="text"></input>
-  <button id='callButton' disabled>Connect me Already!!</button>
-  <button id='debugButton'>Debug</button>
-</div>
+    <div id="videoFeedContainer">
+      <span id="remoteVideoContainer">
+        <video
+          id="remoteVideo"
+          width="1280"
+          height="720"
+          autoplay
+          playsinline
+        ></video>
+        <span id="localVideoContainer">
+          <video id="localVideo" autoplay playsinline muted="muted"></video>
+        </span>
+      </span>
+    </div>
+    <div id="controlsContainer">
+      <h2>1. Enable your camera.</h2>
+      <button id="webcamButton">Turn on Camera</button>
+      <h2>
+        2. If you have an ID, paste it here and connect, Otherwise it will give
+        you one to share!
+      </h2>
+      <input id="callIDInput" type="text" />
+      <button id="callButton" disabled>Start Call</button>
+    </div>
 
     <!--[if lt IE 7]>
-      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+      <p class="browsehappy">
+        You are using an <strong>outdated</strong> browser. Please
+        <a href="#">upgrade your browser</a> to improve your experience.
+      </p>
     <![endif]-->
-    
+
     <script src="../public/src/client.js" type="module"></script>
   </body>
 </html>
