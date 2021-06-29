@@ -21,46 +21,47 @@ export default class RTCConnection {
     // Listen for local ICE candidates on the local RTCPeerConnection
     this.peerConnection.addEventListener('icecandidate', event => {
       if (event.candidate) {
-        socket.emit('new-ice-candidate', event.candidate);
+        socket.emit('newicecandidate', event.candidate);
       }
     });
     
-    //Handshake Logic
-    socket.on('remote-ice-candidate', async (candidate) => {
+    // Once a second user joins a call, the signaling process starts.
+    socket.on('otheruserjoined', async (payload) => {
+    
+    const offer = await this.peerConnection.createOffer();
+    await this.peerConnection.setLocalDescription(offer);
+    
+    payload.offer = offer
+    socket.emit('offercreated', payload);
+    })
+    
+    // Offer Received by Server.  Setting it as remote session description
+    socket.on('receivedoffer', async (payload) => {
+    
+    this.peerConnection.setRemoteDescription(new RTCSessionDescription(payload.offer));
+    const answer = await this.peerConnection.createAnswer();
+    await this.peerConnection.setLocalDescription(answer);
+    payload.answer = answer
+    
+    socket.emit('answeremitted', payload);
+    })
+    
+    // Call Initiator receives the answer and sets remote SDP
+    socket.on('receivedanswer', async (payload) => {
+    await this.peerConnection.setRemoteDescription(new RTCSessionDescription(payload.answer));
+    })
+
+    socket.on('remoteicecandidate', async (candidate) => {
       try {
           await this.peerConnection.addIceCandidate(candidate);
       } catch (e) {
           console.error('Error adding received ice candidate', e);
       }
     })
-    
-    // Created offer and set it as local description for caller.
-    socket.on('OtherJoined', async (payload) => {
-    
-    const offer = await this.peerConnection.createOffer();
-    await this.peerConnection.setLocalDescription(offer);
-    
-    socket.emit('OfferCreated', {caller: payload.caller, target: payload.target, offer : offer});
-    })
-    
-    // Offer Received by Server.  Setting it as remote session description
-    socket.on('ReceivedOffer', async (payload) => {
-    
-    this.peerConnection.setRemoteDescription(new RTCSessionDescription(payload.offer));
-    const answer = await this.peerConnection.createAnswer();
-    await this.peerConnection.setLocalDescription(answer);
-    
-    socket.emit('answer', {caller: payload.caller, target: payload.target, offer : payload.offer, answer: answer});
-    })
-    
-    // Call Initiator receives the answer and sets remote SDP
-    socket.on('ReceivedAnswer', async (payload) => {
-    await this.peerConnection.setRemoteDescription(new RTCSessionDescription(payload.answer));
-    })
   }
 
   initiateCall = (callID) => {
-    socket.emit('initiateCall', callID)
+    socket.emit('registercall', callID)
   }
 
   addLocalStream = () => {
