@@ -25,8 +25,8 @@ webcamButton.onclick = async () => {
 
       webRTCConnection.localStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          width: { ideal: 4096 },
-          height: { ideal: 2160 },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
         },
         audio: {
           sampleSize: 8,
